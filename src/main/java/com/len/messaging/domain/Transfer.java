@@ -1,31 +1,43 @@
 package com.len.messaging.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.Serializable;
 
-@JsonInclude(JsonInclude.Include.NON_NULL) // Ignoriert Null-Werte bei der Serialisierung
-@JsonIgnoreProperties(ignoreUnknown = true)
+
+/**
+ * The persistent class for the TRANSFER database table.
+ *
+ */
 @Entity
+@NamedQueries({
+    @NamedQuery(name="Transfer.findAll", query="SELECT t FROM Transfer t"),
+    @NamedQuery(name="Transfer.findSingle", query="SELECT t FROM Transfer t WHERE t.transferticket=:tt AND t.nutzdatenticket=:ndt"),
+    @NamedQuery(name="Transfer.findByTransferticketAndNDTicket", query="SELECT t FROM Transfer t WHERE t.transferticket=:tt AND t.nutzdatenticket=:ndt")
+})
 @Data
+@ToString
+@AllArgsConstructor
 @NoArgsConstructor
-public class Transfer {
+public class Transfer implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name="TRANSFER_ID_GENERATOR", sequenceName="S_TRANSFER_ID", initialValue=1, allocationSize=1)
+    @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="TRANSFER_ID_GENERATOR")
     private Long id;
 
-    @Column(name = "number", nullable = false)
-    private String number;
+    private Long eingangts;
 
-    @OneToMany(mappedBy = "transfer", cascade = CascadeType.ALL)
-    @JsonManagedReference
-    private List<Agvh> agvhList = new ArrayList<>();
+    private Long herstellerid;
 
+    private String nutzdatenticket;
+
+    private Long speichts;
+
+    private String transferticket;
 }

@@ -1,13 +1,11 @@
+/*
 package com.len.messaging.jms;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.len.messaging.domain.Agvh;
-import com.len.messaging.domain.Transfer;
-import com.len.messaging.repository.AgvhRepository;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.len.messaging.config.AnnotationConfiguration;
 import com.len.messaging.repository.TransferRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.web.WebProperties;
-import org.springframework.integration.support.MessageBuilder;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.stereotype.Component;
@@ -19,12 +17,15 @@ public class AnnotatedReceiver {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private TransferRepository transferRepository;
+    private XmlMapper xmlMapper;
 
     @Autowired
-    private AgvhRepository agvhRepository;
+    private TransferRepository transferRepository;
 
     private final MessageChannel input;
+
+    @Autowired
+    private AnnotationConfiguration.MyGateway gateway;
 
     public AnnotatedReceiver(MessageChannel input) {
         this.input = input;
@@ -32,8 +33,12 @@ public class AnnotatedReceiver {
 
     @JmsListener(destination = "${apress.jms.queue}")
     public void processMessage(String content) {
-        try {
-            Transfer transfer = objectMapper.readValue(content, Transfer.class);
+        gateway.sendToRouter(content);
+        //input.send(MessageBuilder.withPayload(content).build());
+*/
+/*        try {
+            Transfer transfer = xmlMapper.readValue(content, Transfer.class);
+            //Transfer transfer = objectMapper.readValue(content, Transfer.class);
             transfer = transferRepository.save(transfer); // Speichert den Transfer und erhält eine generierte ID
 
             if (transfer.getAgvhList() != null) {
@@ -47,16 +52,19 @@ public class AnnotatedReceiver {
         } catch (Exception e) {
             System.err.println("Fehler bei der Verarbeitung der Nachricht: " + e.getMessage());
             e.printStackTrace();
-        }
+        }*//*
+
 
     }
 
+*/
 /*    @JmsListener(destination = "${apress.jms.queue}")
     public void processMessage(String content) {
 
         System.out.println("JMSSender: " + content);
         input.send(MessageBuilder.withPayload(content).build());
 
-    }*/
+    }*//*
 
-}
+
+}*/

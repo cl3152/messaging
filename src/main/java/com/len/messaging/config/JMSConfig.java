@@ -1,5 +1,6 @@
 package com.len.messaging.config;
 
+import com.len.messaging.jms.QueueListener;
 import jakarta.jms.ConnectionFactory;
 import jakarta.jms.MessageListener;
 import org.springframework.beans.factory.annotation.Value;
@@ -7,16 +8,20 @@ import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFac
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import org.springframework.jms.config.JmsListenerContainerFactory;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessageType;
+import org.springframework.util.ErrorHandler;
 
 @Configuration
 @EnableConfigurationProperties(JMSProperties.class)
+@EnableJms
 public class JMSConfig {
+
 
     /** This is for the QueueListener
      */

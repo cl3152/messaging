@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.example.com/schema"
+           xmlns="http://www.example.com/schema"
+           elementFormDefault="qualified">
+
+    <xs:element name="Elster" type="ElsterType"/>
+
+    <xs:complexType name="ElsterType">
+        <xs:sequence>
+            <xs:element name="Transfer" type="TransferType"/>
+            <xs:element name="Arbeitnehmer" type="ArbeitnehmerType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="TransferType">
+        <xs:sequence>
+            <xs:element name="transferticket" type="xs:string"/>
+            <xs:element name="nutzdatenticket" type="xs:string"/>
+            <xs:element name="herstellerID" type="xs:string"/>
+            <xs:element name="speichTS" type="xs:dateTime"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ArbeitnehmerType">
+        <xs:sequence>
+            <xs:element name="idnr" type="xs:string"/>
+            <xs:element name="gebdat" type="xs:date"/>
+            <xs:element name="steuerklasse" type="xs:string"/>
+            <xs:element name="freibetrag" type="xs:decimal"/>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>

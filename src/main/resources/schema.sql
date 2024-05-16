@@ -5,9 +5,9 @@ CREATE TABLE IF NOT EXISTS transfer (
 );
 
 -- Erstellung der Agvh-Tabelle
-CREATE TABLE IF NOT EXISTS agvh (
+CREATE TABLE IF NOT EXISTS arbeitnehmer (
                                     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-                                    text VARCHAR(255) NOT NULL,
+                                    idnr VARCHAR(255) NOT NULL,
                                     transfer_id BIGINT NOT NULL,
                                     CONSTRAINT fk_transfer FOREIGN KEY (transfer_id) REFERENCES transfer(id)
 );

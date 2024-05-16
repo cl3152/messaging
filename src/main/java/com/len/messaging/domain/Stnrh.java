@@ -10,28 +10,31 @@ import java.io.Serializable;
 
 
 /**
- * The persistent class for the AGVH database table.
+ * The persistent class for the STNRH database table.
  *
  */
 @Entity
 @NamedQueries({
-    @NamedQuery(name="Agvh.findAll", query="SELECT a FROM Agvh a"),
-    @NamedQuery(name="Agvh.findSingle", query="SELECT a FROM Agvh a WHERE a.transferId=:tID AND a.hinweiseId=:hinweiseID")
+    @NamedQuery(name="Stnrh.findAll", query="SELECT s FROM Stnrh s"),
+    @NamedQuery(name="Stnrh.findSingle", query="SELECT a FROM Stnrh a WHERE a.transferId=:tID AND a.hinweiseId=:hinweiseID")
 })
 @Data
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class Agvh implements Serializable, HinweisCommon {
+public class Stnrh implements Serializable, HinweisCommon {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @SequenceGenerator(name="AGVH_ID_GENERATOR", sequenceName="S_AGVH_ID", initialValue=1, allocationSize=1)
-    @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="AGVH_ID_GENERATOR")
+    @SequenceGenerator(name="STNRH_ID_GENERATOR", sequenceName="S_STNRH_ID", initialValue=1, allocationSize=1)
+    @GeneratedValue(strategy= GenerationType.SEQUENCE, generator="STNRH_ID_GENERATOR")
     private Long id;
 
     private Long speichts;
 
+    private String stnr;
+
+    //bi-directional many-to-one association to Hinweise
     @Column(name="HINWEIS_ID")
     private Long hinweiseId;
 
@@ -42,7 +45,4 @@ public class Agvh implements Serializable, HinweisCommon {
     // Für das dynamische Erzeugen (Erkennen im Mapper, aber Anlegen erst mit Zugang zur DB möglich)
     @Transient
     private Hinweise hinweis;
-
-    /** Enthält die Message des AG-Verfahrenhinweises, <b>wenn</b> diese vom Standard der Hinweis-Tabelle abweicht. */
-    private String message;
 }
