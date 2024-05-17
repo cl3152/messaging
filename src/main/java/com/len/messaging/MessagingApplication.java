@@ -17,7 +17,7 @@ public class MessagingApplication {
 		SpringApplication.run(MessagingApplication.class, args);
 	}
 
-	@Bean
+/*	@Bean
 	CommandLineRunner simple(JMSProperties props, SimpleSender sender, XmlMapper xmlMapper, ObjectMapper objectMapper) {
 		return args -> {
 			String xmlMessage = "<?xml version=\"1.0\" encoding=\"ISO-8859-15\"?>\n" +
@@ -220,7 +220,7 @@ public class MessagingApplication {
 
 			System.out.println("XML gesendet.");
 		};
-	}
+	}*/
 /*	@Bean
 	CommandLineRunner simple(JMSProperties props, SimpleSender sender, ObjectMapper objectMapper) {
 		return args -> {

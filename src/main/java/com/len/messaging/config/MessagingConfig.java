@@ -10,11 +10,14 @@ import org.springframework.integration.annotation.MessagingGateway;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.annotation.Transformer;
 import org.springframework.integration.channel.DirectChannel;
+import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.handler.DelayHandler;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.PollableChannel;
 
 @Configuration
 @EnableIntegration
@@ -121,8 +124,10 @@ public Message<String> transformingInput(Message<String> message) {
     @ServiceActivator(inputChannel = "processingChannel")
     public void processingInput(Message<String> message) {
         logger.info("Processing message has this header: {}", message.getHeaders());
+        logger.info(message.getPayload());
         System.out.println("Input Processing. ");
     }
+
 
     @ServiceActivator(inputChannel = "errorChannel")
     public void processingError(Message<String> message) {
