@@ -10,17 +10,38 @@ import org.springframework.context.annotation.Bean;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@SpringBootApplication
+//@SpringBootApplication
 public class MessagingApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(MessagingApplication.class, args);
 	}
 
-/*	@Bean
+	@Bean
 	CommandLineRunner simple(JMSProperties props, SimpleSender sender, XmlMapper xmlMapper, ObjectMapper objectMapper) {
 		return args -> {
-			String xmlMessage = "<?xml version=\"1.0\" encoding=\"ISO-8859-15\"?>\n" +
+			String xmlMessage = "trigger-erroroO<Elster>\n" +
+					"    <Transfer>\n" +
+					"        <Eingangts>1627848392</Eingangts>\n" +
+					"        <Herstellerid>12345</Herstellerid>\n" +
+					"        <Nutzdatenticket>ABC123</Nutzdatenticket>\n" +
+					"        <Speichts>987654321</Speichts>\n" +
+					"        <Transferticket>XYZ789</Transferticket>\n" +
+					"    </Transfer>\n" +
+					"    <Arbeitnehmer>\n" +
+					"        <Abmeldedat>2021-08-01</Abmeldedat>\n" +
+					"        <BB>ExampleBB</BB>\n" +
+					"        <Gebdat>1980-01-01</Gebdat>\n" +
+					"        <Gewuenschterfb>5000.00</Gewuenschterfb>\n" +
+					"        <HAG>1.00</HAG>\n" +
+					"        <Idnr>123456789</Idnr>\n" +
+					"        <Refdatumag>2021-08-01</Refdatumag>\n" +
+					"        <Speichts>987654321</Speichts>\n" +
+					"        <Typ>ExampleTyp</Typ>\n" +
+					"        <TransferId>12345</TransferId>\n" +
+					"    </Arbeitnehmer>\n" +
+					"</Elster>\n";
+		/*	String xmlMessage = "<?xml version=\"1.0\" encoding=\"ISO-8859-15\"?>\n" +
 					"<Elster xmlns=\"http://www.elster.de/2002/XMLSchema\">\n" +
 					"  <TransferHeader version=\"8\">\n" +
 					"    <Verfahren>ElsterLohn2</Verfahren>\n" +
@@ -213,14 +234,14 @@ public class MessagingApplication {
 					"      </Nutzdaten>\n" +
 					"    </Nutzdatenblock>\n" +
 					"  </DatenTeil>\n" +
-					"</Elster>";
+					"</Elster>";*/
 
 			// Senden der Nachricht
 			sender.sendMessage(props.getQueue(), xmlMessage);
 
 			System.out.println("XML gesendet.");
 		};
-	}*/
+	}
 /*	@Bean
 	CommandLineRunner simple(JMSProperties props, SimpleSender sender, ObjectMapper objectMapper) {
 		return args -> {

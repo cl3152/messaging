@@ -28,6 +28,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
+import java.io.IOException;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
@@ -160,7 +162,7 @@ public class MessagingConfigTest {
     }*/
 
     @Test
-    public void testProcessingInput() {
+    public void testProcessingInput() throws IOException {
         Message<String> message = MessageBuilder.withPayload("<?xml").build();
         messagingConfig.processingInput(message);
         // e.g. check the call of a service

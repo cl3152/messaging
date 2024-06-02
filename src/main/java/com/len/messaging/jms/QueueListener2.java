@@ -2,23 +2,20 @@ package com.len.messaging.jms;
 
 import com.len.messaging.config.MessagingConfig;
 import jakarta.jms.JMSException;
-import jakarta.jms.Session;
 import jakarta.jms.TextMessage;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
-@Component
-public class QueueListener {
+//@Component
+public class QueueListener2 {
 
     private final MessagingConfig.ProcessingGateway gateway;
 
     @Autowired
-    public QueueListener(MessagingConfig.ProcessingGateway gateway) {
+    public QueueListener2(MessagingConfig.ProcessingGateway gateway) {
         this.gateway = gateway;
     }
 
@@ -32,17 +29,20 @@ public class QueueListener {
     //Brauch ich einen try catch Block oder greift der globale Error handler?
     @JmsListener(destination = "${apress.jms.queue}")
     public void onMessage(TextMessage jmsMessage) throws JMSException {
-            String payload = jmsMessage.getText();
+        String payload = jmsMessage.getText();
 
-            Message<String> message = MessageBuilder.withPayload(payload)
-                    .setHeader("jms_message", jmsMessage)
-                    .build();
+        // Simuliere einen Fehler, um das Transaktionsmanagement zu testen
+/*        if (payload.contains("trigger-error")) {
+            throw new RuntimeException("Simulierter Fehler zur Überprüfung des Transaktionsmanagements");
+        }*/
 
-            gateway.sendToRouter(message);
+        Message<String> message = MessageBuilder.withPayload(payload)
+                .setHeader("jms_message", jmsMessage)
+                .build();
 
-            jmsMessage.acknowledge();
+        gateway.sendToRouter(message);
 
-            System.out.println("Message sollte acknowledged sein.");
+        System.out.println("Message automatisch acknowledged!!!");
     }
 
 

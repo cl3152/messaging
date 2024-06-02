@@ -1,6 +1,13 @@
 package com.len.messaging.config;
 
+import com.len.messaging.domain.Arbeitnehmer;
+import com.len.messaging.domain.ElsterData;
+import com.len.messaging.domain.Transfer;
 import com.len.messaging.jms.MessageEvaluator;
+import com.len.messaging.repository.ArbeitnehmerRepository;
+import com.len.messaging.repository.TransferRepository;
+import com.len.messaging.service.ArbeitnehmerService;
+import com.len.messaging.util.xmlMapper.ElsterMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -19,14 +26,20 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.PollableChannel;
 
+import java.io.IOException;
+
 @Configuration
 @EnableIntegration
 public class MessagingConfig {
 
-    @Bean
-    public MessageChannel errorChannel() {
-        return new DirectChannel();
-    }
+    private final TransferRepository transferRepository;
+    private final ArbeitnehmerRepository arbeitnehmerRepository;
+    private final ElsterMapper elsterMapper;
+
+    private final ArbeitnehmerService arbeitnehmerService;
+
+
+
     @Bean
     public MessageChannel inputChannel() {
         return new DirectChannel();
@@ -46,7 +59,11 @@ public class MessagingConfig {
 
     private final ProcessingGateway processingGateway;
 
-    public MessagingConfig(MessageEvaluator messageEvaluator, ProcessingGateway processingGateway) {
+    public MessagingConfig(TransferRepository transferRepository, ArbeitnehmerRepository arbeitnehmerRepository, ElsterMapper elsterMapper, ArbeitnehmerService arbeitnehmerService, MessageEvaluator messageEvaluator, ProcessingGateway processingGateway) {
+        this.transferRepository = transferRepository;
+        this.arbeitnehmerRepository = arbeitnehmerRepository;
+        this.elsterMapper = elsterMapper;
+        this.arbeitnehmerService = arbeitnehmerService;
         this.messageEvaluator = messageEvaluator;
         this.processingGateway = processingGateway;
     }
@@ -122,17 +139,26 @@ public Message<String> transformingInput(Message<String> message) {
     }
 
     @ServiceActivator(inputChannel = "processingChannel")
-    public void processingInput(Message<String> message) {
+    public void processingInput(Message<String> message) throws IOException {
         logger.info("Processing message has this header: {}", message.getHeaders());
         logger.info(message.getPayload());
         System.out.println("Input Processing. ");
+        // XML Validierung?!
+        //
+        // Mapper -> Objekte aus XML bekommen - Diese Logik in in Produktiv komplizierter.
+         ElsterData elsterData = elsterMapper.convertXmlToElster(message.getPayload());
+        System.out.println("PROCESSING Elsterdata: " + elsterData);
+
+        // Je nachdem was in elsterData drin ist unterschiedliche Services?!
+        arbeitnehmerService.processElsterDataForArbeitnehmer(elsterData);
     }
 
 
     @ServiceActivator(inputChannel = "errorChannel")
-    public void processingError(Message<String> message) {
-        logger.info("Processing Error has this header: {}", message.getHeaders());
-        System.out.println("Error Processing. ");
+    public void handleError(Message<String> message) {
+        String error = message.getPayload();
+        logger.error("Error processing message: {}", error);
+        // Senden ans Monitoring?!
     }
 
 

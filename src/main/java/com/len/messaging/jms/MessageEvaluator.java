@@ -12,8 +12,9 @@ import java.util.Queue;
 @Component
 public class MessageEvaluator {
 
+    private static final String XML_HEADER_START = "<";
 
-    private static final String XML_HEADER_START = "<?xml";
+    //private static final String XML_HEADER_START = "<?xml";
 
     public enum Action {
         NO_DATA(-1),
@@ -48,6 +49,9 @@ public class MessageEvaluator {
             actions.add(Action.DIREKT_VERARBEITEN);
         } else if (StringUtil.parseElsterInfo(message).isElo()) {
             actions.add(actionByWorkflowStep(message));
+            //Für Testzwecke, weil canProcessByTStamp nicht richtig ist
+        } else if (requestIsXml(message)){
+            actions.add(Action.DIREKT_VERARBEITEN);
         } else {
             System.out.println("Default Evaluator: " + message);
             actions.add(Action.AUSSTEUERN);

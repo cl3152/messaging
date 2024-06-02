@@ -1,16 +1,12 @@
 package com.len.messaging.config;
 
-import com.len.messaging.jms.QueueListener;
 import jakarta.jms.ConnectionFactory;
-import jakarta.jms.MessageListener;
 import jakarta.jms.Session;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.RedeliveryPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFactoryConfigurer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,11 +15,6 @@ import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import org.springframework.jms.config.JmsListenerContainerFactory;
 import org.springframework.jms.connection.CachingConnectionFactory;
-import org.springframework.jms.connection.JmsTransactionManager;
-import org.springframework.jms.listener.DefaultMessageListenerContainer;
-import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
-import org.springframework.jms.support.converter.MessageConverter;
-import org.springframework.jms.support.converter.MessageType;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
@@ -32,24 +23,27 @@ import org.springframework.util.ErrorHandler;
 //@Configuration
 @EnableConfigurationProperties(JMSProperties.class)
 @EnableJms
-public class JMSConfig {
+public class JMSConfig2 {
 
-     private static final Logger logger = LoggerFactory.getLogger(JMSConfig.class);
+     private static final Logger logger = LoggerFactory.getLogger(JMSConfig2.class);
 
+     /** Ziel: lokale JMS-Transaktion
+      * */
      @Bean
      public JmsListenerContainerFactory<?> jmsListenerContainerFactory(ConnectionFactory connectionFactory, @Qualifier("jmsErrorHandler") ErrorHandler errorHandler) {
           DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
           factory.setConnectionFactory(connectionFactory);
-          factory.setConcurrency("1");
-          factory.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
+          factory.setConcurrency("1-20");
+          factory.setSessionTransacted(true); // Aktiviert lokale Transaktionen
+
 
           if (connectionFactory instanceof CachingConnectionFactory) {
                CachingConnectionFactory cachingConnectionFactory = (CachingConnectionFactory) connectionFactory;
-               if (cachingConnectionFactory.getTargetConnectionFactory() instanceof org.apache.activemq.ActiveMQConnectionFactory) {
-                    org.apache.activemq.ActiveMQConnectionFactory activeMQConnectionFactory =
-                            (org.apache.activemq.ActiveMQConnectionFactory) cachingConnectionFactory.getTargetConnectionFactory();
+               if (cachingConnectionFactory.getTargetConnectionFactory() instanceof ActiveMQConnectionFactory) {
+                    ActiveMQConnectionFactory activeMQConnectionFactory =
+                            (ActiveMQConnectionFactory) cachingConnectionFactory.getTargetConnectionFactory();
                     RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
-                    redeliveryPolicy.setMaximumRedeliveries(3);
+                    redeliveryPolicy.setMaximumRedeliveries(4);
                     redeliveryPolicy.setInitialRedeliveryDelay(1000);
                     redeliveryPolicy.setRedeliveryDelay(1000);
                     redeliveryPolicy.setUseExponentialBackOff(false);
