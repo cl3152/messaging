@@ -7,6 +7,13 @@ import lombok.Data;
 @Data
 @JacksonXmlRootElement(localName = "Elster")
 public class ElsterData {
+
+    @JacksonXmlProperty(localName = "Verfahren")
+    private String verfahren;
+
+    @JacksonXmlProperty(localName = "DatenArt")
+    private String datenart;
+
     @JacksonXmlProperty(localName = "Transfer")
     private Transfer transfer;
 

@@ -1,45 +1,84 @@
-/*
+
 package com.len.messaging.service;
 
+import com.len.messaging.domain.Fehler;
+import com.len.messaging.exception.AussteuernException;
+import com.len.messaging.repository.FehlerRepository;
+import org.springframework.retry.RetryException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.stereotype.Service;
 
-import com.len.messaging.util.ElsterMarshaller;
-import com.len.messaging.util.ElsterUtil;
-import com.len.messaging.util.xml.ElsterRootElement;
-import org.springframework.beans.factory.annotation.Autowired;
 
-// alt: IndexerBean
+import static com.len.messaging.util.ExceptionUtil.contains;
+
+@Service
 public class IndexerService {
 
-    private ElsterMarshaller marshaller = new ElsterMarshaller();
+    private final ElsterIndexerService elsterIndexerService;
 
-    @Autowired
-    private ElsterIndexerService elsterIndexer;
+    private final FehlerRepository fehlerRepository;
 
-    public void mapAndStore(String xml, long speichts) {
+    public IndexerService(ElsterIndexerService elsterIndexerService, FehlerRepository fehlerRepository) {
+        this.elsterIndexerService = elsterIndexerService;
+        this.fehlerRepository = fehlerRepository;
+    }
 
-        try {
-            ElsterRootElement elster = marshaller.unmarshal(xml);
-            //warnAboutOldElsterVersion(elster);
-            elsterIndexer.index(elster, speichts);
+    public void mapAndStore(String xml) {
 
+        /* Im Original findet hier u. a. die Validierung der XML gegen ein XSD-Schema statt
+        * ElsterRootElement elster = de.konsens.lavendel.srt.marshaller.ElsterMarshaller.unmarshal(xml);
+        * Dieser Schritt wird im Prototypen übersprungen.
+        *
+        * Weiter Logik im Original: u. a. prüfen auf Testmerker
+        */
 
+         try {
+            elsterIndexerService.indexAndMap(xml);
+        } catch (AussteuernException e) {
+            fehlerAussteuern(xml, e);
         } catch (Exception e) {
-*/
-/*            if (retrySinnvoll(e)) {
-                throw new RetryException(e);
+            if (retrySinnvoll(e)) {
+                /* führt automatisch zu einem Redelivery
+                * das Rollback muss nicht manuell angestoßen werden
+                * (im Gegenteil zum Original, da wird in der übergeordneten onMessge Fn diese gefangen
+                * und ein manuelles Rollback initiiert.
+                */
+                throw new RetryException("Redelivery sinnvoll:", e);
             } else {
-                fehlerAussteuern(xml, speichts, e, ThreadLogDaten.mapperTyp());
-            }*//*
-
-        } finally {
-*/
-/*            long ende = System.currentTimeMillis();
-            long dauer = ende - start;
-            String msgFormat = "Verarbeitung speichts=%s art=\"%s\" in \"%s\"ms beendet.";
-            logger.infof(msgFormat, speichts, ThreadLogDaten.mapperTyp(), dauer);*//*
+                // TODO: alle anderen Exceptions auch aussteuern? bisher so!
+                // kann nicht in Errorhandler ausgelagert werden, wenn die xml beibehalten werden soll.
+                fehlerAussteuern(xml, e);
+            }
 
         }
     }
 
+    private void fehlerAussteuern(String xml, Exception e) {
+        System.out.println("aussteuern");
+        String errorMessage = "Nicht parsbare Daten";
+
+        // Sehr gekürzte Protokollierung der Fehler - nur zu Demonstrationszwecken
+        Fehler fehler = new Fehler()
+                .message(errorMessage);
+          //      .stacktrace(e)
+           //     .rohdaten(xml);
+
+        fehlerRepository.save(fehler);
+    }
+
+
+
+
+    private static boolean retrySinnvoll(Exception exception) {
+        return istUniqueKeyViolationException(exception);
+    }
+
+
+
+    private static boolean istUniqueKeyViolationException(Exception exception) {
+        return contains(exception, "TRANSFER_TT_NDT_IDX");
+    }
+
+
 }
-*/

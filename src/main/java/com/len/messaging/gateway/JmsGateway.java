@@ -1,3 +1,4 @@
+/*
 package com.len.messaging.gateway;
 
 import org.springframework.integration.annotation.MessagingGateway;
@@ -6,3 +7,4 @@ import org.springframework.integration.annotation.MessagingGateway;
 public interface JmsGateway {
     String sendAndReceive(String message);
 }
+*/

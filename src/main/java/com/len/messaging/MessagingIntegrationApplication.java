@@ -1,3 +1,4 @@
+/*
 package com.len.messaging;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,3 +27,4 @@ public class MessagingIntegrationApplication implements CommandLineRunner {
 		System.out.println("Nachricht gesendet: " + message);
 	}
 }
+*/

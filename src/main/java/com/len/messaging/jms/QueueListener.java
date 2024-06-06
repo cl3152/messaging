@@ -12,8 +12,9 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Component
+//@Component
 public class QueueListener {
+/*
 
     private final MessagingConfig.ProcessingGateway gateway;
 
@@ -22,10 +23,12 @@ public class QueueListener {
         this.gateway = gateway;
     }
 
+*/
 /*    @JmsListener(destination = "${apress.jms.queue}")
     public void onMessage(Message<String> message) {
         gateway.sendToRouter(message);
-    }*/
+    }*//*
+
 
 
 
@@ -44,6 +47,7 @@ public class QueueListener {
 
             System.out.println("Message sollte acknowledged sein.");
     }
+*/
 
 
 }

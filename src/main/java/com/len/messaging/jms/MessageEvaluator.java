@@ -50,8 +50,8 @@ public class MessageEvaluator {
         } else if (StringUtil.parseElsterInfo(message).isElo()) {
             actions.add(actionByWorkflowStep(message));
             //Für Testzwecke, weil canProcessByTStamp nicht richtig ist
-        } else if (requestIsXml(message)){
-            actions.add(Action.DIREKT_VERARBEITEN);
+/*        } else if (requestIsXml(message)){
+            actions.add(Action.DIREKT_VERARBEITEN);*/
         } else {
             System.out.println("Default Evaluator: " + message);
             actions.add(Action.AUSSTEUERN);

@@ -3,11 +3,14 @@ package com.len.messaging.config;
 import com.len.messaging.domain.Arbeitnehmer;
 import com.len.messaging.domain.ElsterData;
 import com.len.messaging.domain.Transfer;
+import com.len.messaging.exception.AussteuernException;
 import com.len.messaging.jms.MessageEvaluator;
 import com.len.messaging.repository.ArbeitnehmerRepository;
 import com.len.messaging.repository.TransferRepository;
 import com.len.messaging.service.ArbeitnehmerService;
+import com.len.messaging.service.IndexerService;
 import com.len.messaging.util.xmlMapper.ElsterMapper;
+import org.aspectj.apache.bcel.classfile.annotation.RuntimeInvisAnnos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -25,19 +28,14 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.PollableChannel;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 
 import java.io.IOException;
 
 @Configuration
 @EnableIntegration
 public class MessagingConfig {
-
-    private final TransferRepository transferRepository;
-    private final ArbeitnehmerRepository arbeitnehmerRepository;
-    private final ElsterMapper elsterMapper;
-
-    private final ArbeitnehmerService arbeitnehmerService;
-
 
 
     @Bean
@@ -59,13 +57,13 @@ public class MessagingConfig {
 
     private final ProcessingGateway processingGateway;
 
-    public MessagingConfig(TransferRepository transferRepository, ArbeitnehmerRepository arbeitnehmerRepository, ElsterMapper elsterMapper, ArbeitnehmerService arbeitnehmerService, MessageEvaluator messageEvaluator, ProcessingGateway processingGateway) {
-        this.transferRepository = transferRepository;
-        this.arbeitnehmerRepository = arbeitnehmerRepository;
-        this.elsterMapper = elsterMapper;
-        this.arbeitnehmerService = arbeitnehmerService;
+    private final IndexerService indexerService;
+
+
+    public MessagingConfig(MessageEvaluator messageEvaluator, ProcessingGateway processingGateway, IndexerService indexerService) {
         this.messageEvaluator = messageEvaluator;
         this.processingGateway = processingGateway;
+        this.indexerService = indexerService;
     }
 
     private static final Logger logger = LoggerFactory.getLogger(MessagingConfig.class);
@@ -101,9 +99,10 @@ public class MessagingConfig {
         return handler;
     }
 
-@Transformer(inputChannel = "transformingChannel", outputChannel = "delayingChannel")
+    //TODO: für test zwecke direkt an processing
+@Transformer(inputChannel = "transformingChannel", outputChannel = "processingChannel")
 public Message<String> transformingInput(Message<String> message) {
-        logger.info("Transforming messaging - adding Delay in header");
+    logger.info("Transforming messaging - adding Delay in header");
         MessageEvaluator.Action action = messageEvaluator.evaluate(message.getPayload());
         long delay = action.getDelayFactor() * 2000;
 
@@ -112,7 +111,8 @@ public Message<String> transformingInput(Message<String> message) {
                 .build();
     };
 
-    @ServiceActivator(inputChannel = "inputChannel")
+
+    @ServiceActivator(inputChannel = "inputIntegration")
     public void receivingInput(Message<String> message) {
         String payload = message.getPayload();
         MessageEvaluator.Action action = messageEvaluator.evaluate(payload);
@@ -138,19 +138,18 @@ public Message<String> transformingInput(Message<String> message) {
         }
     }
 
-    @ServiceActivator(inputChannel = "processingChannel")
-    public void processingInput(Message<String> message) throws IOException {
-        logger.info("Processing message has this header: {}", message.getHeaders());
-        logger.info(message.getPayload());
-        System.out.println("Input Processing. ");
-        // XML Validierung?!
-        //
-        // Mapper -> Objekte aus XML bekommen - Diese Logik in in Produktiv komplizierter.
-         ElsterData elsterData = elsterMapper.convertXmlToElster(message.getPayload());
-        System.out.println("PROCESSING Elsterdata: " + elsterData);
 
-        // Je nachdem was in elsterData drin ist unterschiedliche Services?!
-        arbeitnehmerService.processElsterDataForArbeitnehmer(elsterData);
+    @ServiceActivator(inputChannel = "processingChannel")
+    public void processingInput(Message<String> message) {
+        logger.info("Processing message has this header: {}", message.getHeaders());
+        System.out.println("Input Processing. ");
+        /* try catch nicht notwendig, da das Werfen einer RetryException sowieso zum Rollback führt
+        * kein manuelles Anstoßen des Rollbacks notwendig
+        *
+        * Im Original wird hier noch eine Methode process ausgeführt, die die Multithreading-Verarbeitung
+        * kontrolliert.
+         */
+        indexerService.mapAndStore(message.getPayload());
     }
 
 
@@ -158,11 +157,8 @@ public Message<String> transformingInput(Message<String> message) {
     public void handleError(Message<String> message) {
         String error = message.getPayload();
         logger.error("Error processing message: {}", error);
-        // Senden ans Monitoring?!
+        // Senden ans Monitoring?! TODO: ??
     }
-
-
-
 
 
 }

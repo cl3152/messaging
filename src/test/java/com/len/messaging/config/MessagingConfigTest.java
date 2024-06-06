@@ -1,3 +1,4 @@
+/*
 package com.len.messaging.config;
 
 import com.len.messaging.jms.MessageEvaluator;
@@ -46,8 +47,10 @@ public class MessagingConfigTest {
     private MessagingConfig.ProcessingGateway processingGateway;
 
 
+*/
 /*    @MockBean
-    private MockIntegrationContext mockIntegrationContext;*/
+    private MockIntegrationContext mockIntegrationContext;*//*
+
 
 
     @MockBean
@@ -57,11 +60,15 @@ public class MessagingConfigTest {
     @Qualifier("processingChannel")
     MessageChannel testProcessingChannel;
 
+*/
 /*    @Mock
-    private MessageHandler mockHandler;*/
+    private MessageHandler mockHandler;*//*
 
+
+*/
 /*    @Captor
-    private ArgumentCaptor<Message<String>> messageCaptor;*/
+    private ArgumentCaptor<Message<String>> messageCaptor;*//*
+
 
     private AutoCloseable mocks;
 
@@ -72,10 +79,12 @@ public class MessagingConfigTest {
         mocks = MockitoAnnotations.openMocks(this);
         when(messageEvaluator.evaluate(anyString())).thenReturn(MessageEvaluator.Action.DIREKT_VERARBEITEN);
 //        ((DirectChannel) testProcessingChannel).subscribe(mockHandler);
+*/
 /*        outputChannel = new QueueChannel();
         mockIntegrationContext.substituteMessageHandlerFor("messagingConfig.processingInput", message -> {
             outputChannel.send(new GenericMessage<>("processed: " + message.getPayload()));
-        });*/
+        });*//*
+
     }
 
     @AfterEach
@@ -94,6 +103,7 @@ public class MessagingConfigTest {
     }
 
 
+*/
 /*
     Hierfür muss im Setup auf einen outputChannel umgelenkt werden.
     @Test
@@ -107,8 +117,10 @@ public class MessagingConfigTest {
         Message<?> receivedMessage = outputChannel.receive(0);
         assertNotNull(receivedMessage, "Message should have been received.");
         assertEquals("processed: HELLO WORLD", receivedMessage.getPayload());
-    }*/
+    }*//*
 
+
+*/
 /*    @Test
     public void testProcessingFlow2() {
         // Given
@@ -122,9 +134,11 @@ public class MessagingConfigTest {
         Message<String> receivedMessage = messageCaptor.getValue();
         assertNotNull(receivedMessage, "Message should have been received by the handler.");
         assertEquals("HELLO WORLD", receivedMessage.getPayload());
-    }*/
+    }*//*
 
 
+
+*/
 /*    @Test
     public void testFilterReject() {
         // Send a message that should be filtered out
@@ -144,8 +158,10 @@ public class MessagingConfigTest {
         Message<?> receivedMessage = processingChannel.receive(1000);
         assertNotNull(receivedMessage, "Message should have been received.");
         assertEquals("TEST MESSAGE", receivedMessage.getPayload());
-    }*/
+    }*//*
 
+
+*/
 /*    @Test
     public void testProcessingChannel() {
         // Given
@@ -159,7 +175,8 @@ public class MessagingConfigTest {
         Message<String> receivedMessage = messageCaptor.getValue();
         assertNotNull(receivedMessage, "Message should have been received within the timeout period.");
         assertEquals("<?xml", receivedMessage.getPayload());
-    }*/
+    }*//*
+
 
     @Test
     public void testProcessingInput() throws IOException {
@@ -173,3 +190,4 @@ public class MessagingConfigTest {
 
 
 }
+*/

@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Bean;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-//@SpringBootApplication
+@SpringBootApplication
 public class MessagingApplication {
 
 	public static void main(String[] args) {
@@ -20,7 +20,9 @@ public class MessagingApplication {
 	@Bean
 	CommandLineRunner simple(JMSProperties props, SimpleSender sender, XmlMapper xmlMapper, ObjectMapper objectMapper) {
 		return args -> {
-			String xmlMessage = "trigger-erroroO<Elster>\n" +
+			String xmlMessage = "<Elster>\n" +
+					"    <Verfahren>ElsterLohn2</Verfahren>\n" +
+					"    <DatenArt>AenderungslisteDUe</DatenArt>\n" +
 					"    <Transfer>\n" +
 					"        <Eingangts>1627848392</Eingangts>\n" +
 					"        <Herstellerid>12345</Herstellerid>\n" +
