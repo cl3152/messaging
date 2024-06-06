@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.len.messaging.domain.ElsterData;
 import com.len.messaging.exception.AussteuernException;
+import com.len.messaging.exception.SammellieferungException;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 
@@ -20,11 +21,11 @@ public class ElsterMapper {
     }
 
 
-    public ElsterData convertXmlToElster(String xml) throws AussteuernException {
+    public ElsterData convertXmlToElster(String xml) throws SammellieferungException {
         try {
             return xmlMapper.readValue(xml, ElsterData.class);
         } catch (JsonProcessingException e) {
-            throw new AussteuernException("Mapping schlug fehl: ", e);
+            throw new SammellieferungException("Mapping schlug fehl: ", e);
         }
     }
 

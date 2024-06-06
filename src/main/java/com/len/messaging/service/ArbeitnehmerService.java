@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.annotation.Transactional;
 
+
 import java.util.Optional;
 
 @Service
@@ -29,45 +30,35 @@ public class ArbeitnehmerService {
      * Falls auch JMS-Transaktionen verwendet werden sollen,
      * dann muss ein Transaktionsmanager angegeben werden:
      *
-     * @Transactional("transactionManager")
+     * @Transactional(transactionManager = "transactionManager", rollbackFor = Exception.class)
+     * (in JpaConfig dann definiert)
      *
-     * Implementorische Anlehnung an saveMappedTransfer aus ElsterIndexer
+     * Anlehnung an die saveMappedTransfer-Methode aus ElsterIndexer
      */
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void processElsterDataForArbeitnehmer(ElsterData elsterData) throws AussteuernException {
         Logger logger = LoggerFactory.getLogger(this.getClass());
 
         try {
             /* Im Original weicht die Verarbeitung hier im Detail ab.
+            * z. B. wird erst überprüft, ob ein Transfer schon in der DB enthalten ist.
             * Es handelt sich hier um eine vereinfachte Umsetzung.
             * */
-
-
-            // Transfer schon in Datenbank vorhanden?
-
-            // ja
-            // Im Original noch eine "Mergelogik" und dann save
-
-
-            // nein
-            // dann save
-            // falls erfolgreich save arbeitnehmer,
-            // falls die Kombi Transfer + Arbeitnehmer noch nicht in DB vorhanden ist
-
             validateElsterData(elsterData);
 
             Transfer transfer = elsterData.getTransfer();
             Arbeitnehmer arbeitnehmer = elsterData.getArbeitnehmer();
 
-            logger.info("ArbeitnehmerService versucht: ElsterData -> Transfer + Arbeitnehmer in DB");
-
-            // Save the Transfer entity
             Transfer savedTransfer = transferRepository.save(transfer);
 
-            // Save the Arbeitnehmer entity with the saved transfer ID
+            /* Zum Testen:
+             throw new RuntimeException("Error simulieren: Transaktion nicht erfolgreich");
+             */
+
             arbeitnehmer.setTransferId(savedTransfer.getId());
             arbeitnehmerRepository.save(arbeitnehmer);
 
+            logger.info("ArbeitnehmerService hat ElsterData=Transfer + Arbeitnehmer in DB gespeichert");
         }
         /*
          * Im Original werden folgende Exceptions geprüft, die zu einem Aussteuern führen:
@@ -78,12 +69,12 @@ public class ArbeitnehmerService {
         catch (DataAccessException | TransactionException e) {
             handleException("Datenbank- oder Transaktionsfehler bei der Verarbeitung von ElsterData aufgetreten", e);
         } catch (Exception e) {
+            // Dieser Catch-Block ist im Original nicht enthalten.
             handleException("Bei der Verarbeitung von ElsterData ist ein unerwarteter Fehler aufgetreten", e);
         }
     }
 
     private void validateElsterData(ElsterData elsterData) throws AussteuernException {
-        Optional.ofNullable(elsterData).orElseThrow(() -> new AussteuernException("ElsterData is null"));
         Optional.ofNullable(elsterData.getTransfer()).orElseThrow(() -> new AussteuernException("Transfer is null in ElsterData"));
         Optional.ofNullable(elsterData.getArbeitnehmer()).orElseThrow(() -> new AussteuernException("Arbeitnehmer is null in ElsterData"));
     }
