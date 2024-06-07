@@ -41,7 +41,7 @@ public class IndexerService {
             if (retrySinnvoll(e)) {
                 /* führt automatisch zu einem Redelivery
                 * das Rollback muss nicht manuell angestoßen werden
-                * (im Gegenteil zum Original, da wird in der übergeordneten onMessge Fn diese gefangen
+                * (im Gegenteil zum Original, da wird in der übergeordneten onMessage Fn diese gefangen
                 * und ein manuelles Rollback initiiert.
                 */
                 throw new RetryException("Redelivery sinnvoll:", e);

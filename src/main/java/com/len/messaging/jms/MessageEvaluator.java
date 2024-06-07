@@ -12,9 +12,8 @@ import java.util.Queue;
 @Component
 public class MessageEvaluator {
 
+    // Original: private static final String XML_HEADER_START = "<?xml";
     private static final String XML_HEADER_START = "<";
-
-    //private static final String XML_HEADER_START = "<?xml";
 
     public enum Action {
         NO_DATA(-1),
@@ -45,11 +44,12 @@ public class MessageEvaluator {
             actions.add(Action.KEIN_XML);
         } else if (!requestIsXml(message)) { // Duplikat?
             actions.add(Action.AUSSTEUERN);
+            /*nur für die alte Verzögerungslogik
         } else if (canProcessByTStamp(message)) {
-            actions.add(Action.DIREKT_VERARBEITEN);
+            actions.add(Action.DIREKT_VERARBEITEN);*/
         } else if (StringUtil.parseElsterInfo(message).isElo()) {
             actions.add(actionByWorkflowStep(message));
-            //Für Testzwecke, weil canProcessByTStamp nicht richtig ist
+            //Für Testzwecke
 /*        } else if (requestIsXml(message)){
             actions.add(Action.DIREKT_VERARBEITEN);*/
         } else {
@@ -68,11 +68,16 @@ public class MessageEvaluator {
         return message.contains(XML_HEADER_START); // Vereinfachte Überprüfung, ob es sich um XML handelt
     }
 
+/*    *//**
+     * Die Methode wird im Original dazu verwendet, um eine Header-Eigenschaft aus der Message zu lesen, welche
+     * den frühesten Verarbeitungszeitpunkt enthält.
+     * Für die alte Verarbeitungslogik wichtig.
+     * *//*
     private boolean canProcessByTStamp(String message) {
-        // Das Zurückstellen wurde hier beachtet:
-        // Wenn ein Zeitstempel existiert, dann wurde er hier ausgewertet.
-        return false; // Standardmäßig auf false gesetzt für das Beispiel
-    }
+        // Inhalt gelöscht.
+        // Wenn ein Zeitstempel im Header der Nachricht existiert, dann wurde er hier ausgewertet.
+        return false;
+    }*/
 
 
     private Action actionByWorkflowStep(String message) {

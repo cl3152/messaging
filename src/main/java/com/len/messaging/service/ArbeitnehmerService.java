@@ -13,6 +13,7 @@ import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.annotation.Transactional;
 
 
+import javax.swing.text.html.Option;
 import java.util.Optional;
 
 @Service
@@ -41,7 +42,7 @@ public class ArbeitnehmerService {
 
         try {
             /* Im Original weicht die Verarbeitung hier im Detail ab.
-            * z. B. wird erst überprüft, ob ein Transfer schon in der DB enthalten ist.
+            * z. B. wird, falls der Transfer schon in der DB enthalten ist, der Transfer "gemerged".
             * Es handelt sich hier um eine vereinfachte Umsetzung.
             * */
             validateElsterData(elsterData);
@@ -49,16 +50,41 @@ public class ArbeitnehmerService {
             Transfer transfer = elsterData.getTransfer();
             Arbeitnehmer arbeitnehmer = elsterData.getArbeitnehmer();
 
-            Transfer savedTransfer = transferRepository.save(transfer);
+            Optional<Transfer> existingTransferOpt = transferRepository.findByTransferticketAndNutzdatenticket(
+                    transfer.getTransferticket(), transfer.getNutzdatenticket());
 
-            /* Zum Testen:
+            if (existingTransferOpt.isEmpty()){
+                Transfer savedTransfer = transferRepository.save(transfer);
+                logger.info("Transfer gespeichert");
+
+                Optional<Arbeitnehmer> existingArbeitnehmerOpt = arbeitnehmerRepository.findSingle(
+                        savedTransfer.getId(), arbeitnehmer.getIdnr(), arbeitnehmer.getTyp());
+
+                /* Zum Testen:
              throw new RuntimeException("Error simulieren: Transaktion nicht erfolgreich");
              */
+                if (existingArbeitnehmerOpt.isEmpty()) {
+                    arbeitnehmer.setTransferId(savedTransfer.getId());
+                    arbeitnehmerRepository.save(arbeitnehmer);
+                    logger.info("Arbeitnehmer zum neuen Transfer gespeichert");
+                } else {
+                    logger.info("Den Arbeitnehmer (idnr) zu dieser TransferId und diesem Typen gibt es schon.");
+                }
 
-            arbeitnehmer.setTransferId(savedTransfer.getId());
-            arbeitnehmerRepository.save(arbeitnehmer);
+            } else {
+                logger.info("Es gibt schon einen Transfer-DB-Eintrag");
+                Transfer existingTransfer = existingTransferOpt.get();
+                Optional<Arbeitnehmer> existingArbeitnehmerOpt = arbeitnehmerRepository.findSingle(
+                        existingTransfer.getId(), arbeitnehmer.getIdnr(), arbeitnehmer.getTyp());
 
-            logger.info("ArbeitnehmerService hat ElsterData=Transfer + Arbeitnehmer in DB gespeichert");
+                if (existingArbeitnehmerOpt.isEmpty()) {
+                    arbeitnehmer.setTransferId(existingTransfer.getId());
+                    arbeitnehmerRepository.save(arbeitnehmer);
+                    logger.info("Arbeitnehmer zum existierenden Transfer gespeichert");
+                } else {
+                    logger.info("Den Arbeitnehmer (idnr) zu dieser TransferId und diesem Typen gibt es schon.");
+                }
+            }
         }
         /*
          * Im Original werden folgende Exceptions geprüft, die zu einem Aussteuern führen:

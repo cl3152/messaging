@@ -25,6 +25,9 @@ public class ElsterMapper {
         try {
             return xmlMapper.readValue(xml, ElsterData.class);
         } catch (JsonProcessingException e) {
+            /* Im Original wird beim fehlgeschlagenen Mapping eine SammellieferungsException geworfen. (mapper.map)
+             * Hier analog.
+             */
             throw new SammellieferungException("Mapping schlug fehl: ", e);
         }
     }

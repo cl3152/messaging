@@ -99,8 +99,7 @@ public class MessagingConfig {
         return handler;
     }
 
-    //TODO: für test zwecke direkt an processing
-@Transformer(inputChannel = "transformingChannel", outputChannel = "processingChannel")
+@Transformer(inputChannel = "transformingChannel", outputChannel = "delayingChannel")
 public Message<String> transformingInput(Message<String> message) {
     logger.info("Transforming messaging - adding Delay in header");
         MessageEvaluator.Action action = messageEvaluator.evaluate(message.getPayload());

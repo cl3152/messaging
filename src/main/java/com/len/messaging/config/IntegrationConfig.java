@@ -48,7 +48,7 @@ public class IntegrationConfig {
 
     @Bean
     public ActiveMQConnectionFactory connectionFactory() {
-        ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+        ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(jmsProperties.getBrokerUrl());
 
         // Konfiguration der Redelivery-Policy
         RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
