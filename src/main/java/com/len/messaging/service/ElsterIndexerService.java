@@ -54,7 +54,7 @@ public class ElsterIndexerService {
             eine Sammellieferungexception gefangen und behandelt.
              */
         } finally {
-            logger.info("Verarbeitung der Daten beendet.");
+            logger.info("indexAndMap-Methode im ElsterIndexer beendet.");
         }
 
     }

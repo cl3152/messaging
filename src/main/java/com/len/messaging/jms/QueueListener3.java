@@ -1,3 +1,4 @@
+/*
 package com.len.messaging.jms;
 
 import com.len.messaging.config.MessagingConfig;
@@ -45,3 +46,4 @@ public class QueueListener3 {
         jmsTemplate.convertAndSend(destination, response);
     }
 }
+*/

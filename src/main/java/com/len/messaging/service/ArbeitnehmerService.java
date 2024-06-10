@@ -36,7 +36,7 @@ public class ArbeitnehmerService {
      *
      * Anlehnung an die saveMappedTransfer-Methode aus ElsterIndexer
      */
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(transactionManager = "transactionManager", rollbackFor = Exception.class)
     public void processElsterDataForArbeitnehmer(ElsterData elsterData) throws AussteuernException {
         Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -60,9 +60,7 @@ public class ArbeitnehmerService {
                 Optional<Arbeitnehmer> existingArbeitnehmerOpt = arbeitnehmerRepository.findSingle(
                         savedTransfer.getId(), arbeitnehmer.getIdnr(), arbeitnehmer.getTyp());
 
-                /* Zum Testen:
-             throw new RuntimeException("Error simulieren: Transaktion nicht erfolgreich");
-             */
+
                 if (existingArbeitnehmerOpt.isEmpty()) {
                     arbeitnehmer.setTransferId(savedTransfer.getId());
                     arbeitnehmerRepository.save(arbeitnehmer);
@@ -85,12 +83,18 @@ public class ArbeitnehmerService {
                     logger.info("Den Arbeitnehmer (idnr) zu dieser TransferId und diesem Typen gibt es schon.");
                 }
             }
+
+                /* Zum Testen:
+             throw new RuntimeException("Error simulieren: Transaktion nicht erfolgreich");
+             */
+
         }
         /*
          * Im Original werden folgende Exceptions geprüft, die zu einem Aussteuern führen:
          * IllegalStateException | RollbackException | SecurityException | HeuristicMixedException | HeuristicRollbackException |
          * javax.transaction.RollbackException | SystemException | NotSupportedException e
          * Was hier sinnvoll ist, muss überprüft werden.
+         * Evtl. PersistenceExceptionTranslator einsetzen
          * */
         catch (DataAccessException | TransactionException e) {
             handleException("Datenbank- oder Transaktionsfehler bei der Verarbeitung von ElsterData aufgetreten", e);

@@ -35,10 +35,13 @@ public class IndexerService {
 
          try {
             elsterIndexerService.indexAndMap(xml);
+             throw new RuntimeException("test");
+
         } catch (AussteuernException e) {
             fehlerAussteuern(xml, e);
         } catch (Exception e) {
-            if (retrySinnvoll(e)) {
+             if(true){
+            //if (retrySinnvoll(e)) {
                 /* führt automatisch zu einem Redelivery
                 * das Rollback muss nicht manuell angestoßen werden
                 * (im Gegenteil zum Original, da wird in der übergeordneten onMessage Fn diese gefangen

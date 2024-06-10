@@ -1,3 +1,5 @@
+/*
+
 package com.len.messaging.jms;
 
 import com.len.messaging.config.MessagingConfig;
@@ -17,7 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-//@Component
+@Component
 public class QueueListener4 {
 
     private final MessagingConfig.ProcessingGateway gateway;
@@ -48,7 +50,7 @@ public class QueueListener4 {
                Message<String> buildmessage = MessageBuilder.withPayload(message)
                         .build();
 
-            gateway.sendToRouter(buildmessage);
+           // gateway.sendToRouter(buildmessage);
 
                 if (message.contains("trigger-error")) {
                     throw new RuntimeException("Simulierter Fehler zur Überprüfung des Transaktionsmanagements");
@@ -68,3 +70,5 @@ public class QueueListener4 {
         jmsTemplate.convertAndSend(destination, response);
     }
 }
+
+*/

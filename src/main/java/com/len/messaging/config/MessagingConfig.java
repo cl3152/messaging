@@ -37,7 +37,10 @@ import java.io.IOException;
 @EnableIntegration
 public class MessagingConfig {
 
-
+    @Bean
+    public MessageChannel inputIntegration() {
+        return new DirectChannel();
+    }
     @Bean
     public MessageChannel inputChannel() {
         return new DirectChannel();

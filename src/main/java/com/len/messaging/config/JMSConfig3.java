@@ -30,7 +30,6 @@ public class JMSConfig3 {
      @Bean
      public ConnectionFactory connectionFactory() {
           ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory();
-          // Set properties
           RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
           redeliveryPolicy.setMaximumRedeliveries(4);
           redeliveryPolicy.setInitialRedeliveryDelay(1000);
@@ -50,7 +49,7 @@ public class JMSConfig3 {
           factory.setConnectionFactory(connectionFactory);
           factory.setConcurrency("1-20");
           factory.setSessionTransacted(true); // Aktiviert lokale Transaktionen
-          factory.setTransactionManager(jmsTransactionManager);
+         // factory.setTransactionManager(jmsTransactionManager);
           factory.setErrorHandler(errorHandler);
           return factory;
      }

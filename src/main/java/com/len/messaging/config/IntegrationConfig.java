@@ -1,40 +1,27 @@
 package com.len.messaging.config;
 
-import com.len.messaging.exception.AussteuernException;
 import jakarta.jms.ConnectionFactory;
-import jakarta.jms.JMSException;
+import jakarta.jms.Session;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.RedeliveryPolicy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.config.EnableIntegration;
-import org.springframework.integration.context.IntegrationContextUtils;
-import org.springframework.integration.core.MessagingTemplate;
 import org.springframework.integration.jms.DefaultJmsHeaderMapper;
 import org.springframework.integration.jms.dsl.Jms;
 import org.springframework.integration.jms.dsl.JmsMessageDrivenChannelAdapterSpec;
 import org.springframework.jms.annotation.EnableJms;
+import org.springframework.jms.connection.CachingConnectionFactory;
 import org.springframework.jms.connection.JmsTransactionManager;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageHandler;
 
-import jakarta.jms.Session;
-import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.retry.RetryException;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.util.ErrorHandler;
 
-@Configuration
+//@Configuration
 @EnableIntegration
 @EnableConfigurationProperties(JMSProperties.class)
 @EnableJms
@@ -47,8 +34,10 @@ public class IntegrationConfig {
     }
 
     @Bean
-    public ActiveMQConnectionFactory connectionFactory() {
+    public CachingConnectionFactory connectionFactory() {
         ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(jmsProperties.getBrokerUrl());
+        //factory.setUserName(jmsProperties.getUser());
+        //factory.setPassword(jmsProperties.getPassword());
 
         // Konfiguration der Redelivery-Policy
         RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
@@ -58,8 +47,7 @@ public class IntegrationConfig {
 
         factory.setRedeliveryPolicy(redeliveryPolicy);
 
-        return factory;
-    }
+        return new CachingConnectionFactory(factory);    }
 
     @Bean
     public MessageChannel inputIntegration() {
@@ -71,12 +59,16 @@ public class IntegrationConfig {
         DefaultMessageListenerContainer container = new DefaultMessageListenerContainer();
         container.setConnectionFactory(connectionFactory());
         container.setDestinationName(jmsProperties.getQueue());
-        container.setSessionTransacted(false);
+        container.setTransactionManager(jmsTransactionManager(connectionFactory()));
+        // default auto bleibt glaub ich:
+        // https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/jms/listener/DefaultMessageListenerContainer.html
+        //
+        container.setSessionTransacted(true);
+        container.setSessionAcknowledgeMode(Session.SESSION_TRANSACTED);
         // container.setErrorHandler(jmsErrorHandler()); Kann mit Spring Integration nicht verwendet werden.
         // https://docs.spring.io/spring-integration/reference/changes-4.1-4.2.html#conversion-errors-in-message-driven-endpoints transacted ist default
         // https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/jms/listener/AbstractMessageListenerContainer.html
         // mMn gleiches Verhalten bei Auto Acknowledge
-        container.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
         return container;
     }
 
@@ -84,30 +76,29 @@ public class IntegrationConfig {
     public JmsMessageDrivenChannelAdapterSpec<?> jmsMessageDrivenChannelAdapter() {
         return Jms.messageDrivenChannelAdapter(messageListenerContainer())
                 .headerMapper(new DefaultJmsHeaderMapper())
-                .outputChannel(inputIntegration())
-                ;
+                .outputChannel(inputIntegration());
     }
 
-        /*
+
   //Da nichts in eine Queue gesendet wird, wird es momentan nicht verwendet.
 
     @Bean
     public JmsTemplate jmsTemplate() {
         JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory());
-        jmsTemplate.setSessionTransacted(false);
+        jmsTemplate.setSessionTransacted(true);
         return jmsTemplate;
     }
-    */
 
-    /*
+
+
 
   //Es werden keine JMS-Transaktionen verwendet, deswegen auskommentiert
 
-    @Bean
+    @Bean(name = "jmsTransactionManager")
     public PlatformTransactionManager jmsTransactionManager(ConnectionFactory connectionFactory) {
         return new JmsTransactionManager(connectionFactory);
     }
-*/
+
 
     /*
      *//**

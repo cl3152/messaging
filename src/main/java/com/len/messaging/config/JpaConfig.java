@@ -1,4 +1,4 @@
-/*
+
 
 
 //Es werden keine JMS-Transaktionen verwendet, deswegen muss kein JPA-Manager explizit definiert werden.
@@ -19,7 +19,7 @@ import jakarta.persistence.EntityManagerFactory;
 public class JpaConfig {
 
 
-    @Bean
+    @Bean(name = "transactionManager")
     public PlatformTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
         return new JpaTransactionManager(entityManagerFactory);
     }
@@ -28,4 +28,4 @@ public class JpaConfig {
 }
 
 
-*/
+

@@ -15,5 +15,7 @@ public class JMSProperties {
     private String rateReplyQueue;
     private String topic;
     private String brokerUrl;
+    private String user;
+    private String password;
 
 }
