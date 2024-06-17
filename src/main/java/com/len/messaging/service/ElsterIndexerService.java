@@ -1,16 +1,12 @@
 package com.len.messaging.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.len.messaging.domain.ElsterData;
-import com.len.messaging.domain.Sammellieferung;
 import com.len.messaging.exception.AussteuernException;
 import com.len.messaging.exception.SammellieferungException;
 import com.len.messaging.util.xmlMapper.ElsterMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
-import java.io.IOException;
 
 @Service
 public class ElsterIndexerService {
@@ -47,6 +43,7 @@ public class ElsterIndexerService {
                  */
                 arbeitnehmerService.processElsterDataForArbeitnehmer(elsterData);
             } else {
+                // Wenn Mapping nicht gelingt
                 throw new AussteuernException("elsterData == null");
             }
         } catch (SammellieferungException e) {

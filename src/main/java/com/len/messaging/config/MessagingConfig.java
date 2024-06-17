@@ -1,16 +1,7 @@
 package com.len.messaging.config;
 
-import com.len.messaging.domain.Arbeitnehmer;
-import com.len.messaging.domain.ElsterData;
-import com.len.messaging.domain.Transfer;
-import com.len.messaging.exception.AussteuernException;
 import com.len.messaging.jms.MessageEvaluator;
-import com.len.messaging.repository.ArbeitnehmerRepository;
-import com.len.messaging.repository.TransferRepository;
-import com.len.messaging.service.ArbeitnehmerService;
 import com.len.messaging.service.IndexerService;
-import com.len.messaging.util.xmlMapper.ElsterMapper;
-import org.aspectj.apache.bcel.classfile.annotation.RuntimeInvisAnnos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -20,18 +11,11 @@ import org.springframework.integration.annotation.MessagingGateway;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.annotation.Transformer;
 import org.springframework.integration.channel.DirectChannel;
-import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.handler.DelayHandler;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.PollableChannel;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
-
-import java.io.IOException;
 
 @Configuration
 @EnableIntegration

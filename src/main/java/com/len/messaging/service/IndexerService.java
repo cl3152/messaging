@@ -35,7 +35,7 @@ public class IndexerService {
 
          try {
             elsterIndexerService.indexAndMap(xml);
-             throw new RuntimeException("test");
+            // throw new RuntimeException("test");
 
         } catch (AussteuernException e) {
             fehlerAussteuern(xml, e);

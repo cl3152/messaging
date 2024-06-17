@@ -20,7 +20,7 @@ public class MessagingApplication {
 	@Bean
 	CommandLineRunner simple(JMSProperties props, SimpleSender sender, XmlMapper xmlMapper, ObjectMapper objectMapper) {
 		return args -> {
-			String xmlMessage = "trigger-error<Elster>\n" +
+			String xmlMessage = "<Elster>\n" +
 					"    <Verfahren>ElsterLohn2</Verfahren>\n" +
 					"    <DatenArt>AenderungslisteDUe</DatenArt>\n" +
 					"    <Transfer>\n" +

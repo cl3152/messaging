@@ -1,6 +1,7 @@
 package com.len.messaging.config;
 
 import jakarta.jms.ConnectionFactory;
+import jakarta.jms.Session;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.RedeliveryPolicy;
 import org.slf4j.Logger;
@@ -20,10 +21,12 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.ErrorHandler;
 
-//@Configuration
+@Configuration
 @EnableConfigurationProperties(JMSProperties.class)
 @EnableJms
 public class JMSConfig3 {
+
+
 
      private static final Logger logger = LoggerFactory.getLogger(JMSConfig3.class);
 
