@@ -37,6 +37,7 @@ public class JmsMetrics {
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+            System.out.println(response);
 
             // JSON-Antwort ausgeben
             String responseBodyString = response.getBody();
@@ -45,7 +46,7 @@ public class JmsMetrics {
             // JSON-Antwort parsen
             ObjectMapper objectMapper = new ObjectMapper();
             Map<String, Object> responseBody = objectMapper.readValue(responseBodyString, Map.class);
-
+            System.out.println(responseBody);
             // Den Wert der QueueSize extrahieren
             if (responseBody.containsKey("value")) {
                 Map<String, Object> valueMap = (Map<String, Object>) responseBody.get("value");
