@@ -14,7 +14,6 @@ import java.util.Map;
 @Component
 @Endpoint(id = "jms")
 public class JmsEndpoint {
-
     private final JmsMetrics jmsMetrics;
     private final MetricsService metricsService;
 
@@ -22,16 +21,11 @@ public class JmsEndpoint {
         this.jmsMetrics = jmsMetrics;
         this.metricsService = metricsService;
     }
-
     @ReadOperation
-    public Map<String, Object> jmsMetrics() throws JsonProcessingException {
+    public Map<String, Object> jmsMetrics() {
         Map<String, Object> metrics = new HashMap<>();
         metrics.put("test-queue-size", jmsMetrics.getQueueSize("jms-demo"));
         metrics.put("custom-counter", metricsService.getCounterValue());
-
         return metrics;
-
-
     }
-
 }
