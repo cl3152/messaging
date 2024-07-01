@@ -39,11 +39,7 @@ public class IndexerService {
             fehlerAussteuern(xml, e);
         } catch (Exception e) {
             if (retrySinnvoll(e)) {
-                /* führt automatisch zu einem Redelivery
-                * das Rollback muss nicht manuell angestoßen werden
-                * (im Gegenteil zum Original, da wird in der übergeordneten onMessage Fn diese gefangen
-                * und ein manuelles Rollback initiiert.
-                */
+                // Löst Rollback aus
                 throw new RetryException("Redelivery sinnvoll:", e);
             } else {
                 // Alle anderen Exceptions werden momentan ausgesteuert

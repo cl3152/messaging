@@ -7,8 +7,6 @@ import com.len.messaging.exception.AussteuernException;
 import com.len.messaging.repository.ArbeitnehmerRepository;
 import com.len.messaging.repository.TransferRepository;
 //import de.konsens.lavendel.srt.logging.SrtLogger;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
