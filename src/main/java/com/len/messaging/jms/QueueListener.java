@@ -20,6 +20,7 @@ public class QueueListener {
     @JmsListener(destination = "${jms.queue}", containerFactory = "jmsListenerContainerFactory")
     public void onMessage(String message) {
         inputIntegration.send(MessageBuilder.withPayload(message).build());
+        // Metrik unter actuator/jms abrufbar
         metricsService.incrementCounter();
     }
 }

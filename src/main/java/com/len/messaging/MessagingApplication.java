@@ -43,8 +43,6 @@ public class MessagingApplication {
 					"</Elster>\n";
 
 			sender.sendMessage(props.getQueue(), xmlMessage);
-
-			System.out.println("XML an Queue gesendet.");
 		};
 	}
 }

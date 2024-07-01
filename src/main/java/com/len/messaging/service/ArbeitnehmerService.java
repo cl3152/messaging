@@ -61,7 +61,7 @@ public class ArbeitnehmerService {
 
             if (existingTransferOpt.isEmpty()){
                 Transfer savedTransfer = transferRepository.save(transfer);
-                logger.info("Transfer gespeichert-----------------------------------------------------------------------");
+                logger.info("Neuer Transfer gespeichert");
 
                 Optional<Arbeitnehmer> existingArbeitnehmerOpt = arbeitnehmerRepository.findSingle(
                         savedTransfer.getId(), arbeitnehmer.getIdnr(), arbeitnehmer.getTyp());
@@ -70,7 +70,7 @@ public class ArbeitnehmerService {
                 if (existingArbeitnehmerOpt.isEmpty()) {
                     arbeitnehmer.setTransferId(savedTransfer.getId());
                     arbeitnehmerRepository.save(arbeitnehmer);
-                    logger.info("Arbeitnehmer zum neuen Transfer gespeichert---------------------------------------------------");
+                    logger.info("Arbeitnehmer zum neuen Transfer gespeichert");
                 } else {
                     logger.info("Den Arbeitnehmer (idnr) zu dieser TransferId und diesem Typen gibt es schon.");
                 }

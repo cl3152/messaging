@@ -15,7 +15,6 @@ public class IndexerService {
 
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
-
     private final ElsterIndexerService elsterIndexerService;
 
     private final FehlerRepository fehlerRepository;
@@ -36,12 +35,9 @@ public class IndexerService {
 
          try {
             elsterIndexerService.indexAndMap(xml);
-            // throw new RuntimeException("test");
-
         } catch (AussteuernException e) {
             fehlerAussteuern(xml, e);
         } catch (Exception e) {
-             //if(true){
             if (retrySinnvoll(e)) {
                 /* führt automatisch zu einem Redelivery
                 * das Rollback muss nicht manuell angestoßen werden
@@ -50,8 +46,8 @@ public class IndexerService {
                 */
                 throw new RetryException("Redelivery sinnvoll:", e);
             } else {
-                // TODO: alle anderen Exceptions auch aussteuern? bisher so!
-                // kann nicht in Errorhandler ausgelagert werden, wenn die xml beibehalten werden soll.
+                // Alle anderen Exceptions werden momentan ausgesteuert
+                // Kann nicht in einen Errorhandler ausgelagert werden, wenn die xml beibehalten werden soll
                 fehlerAussteuern(xml, e);
             }
 
@@ -72,7 +68,6 @@ public class IndexerService {
         fehlerRepository.save(fehler);
 
         logger.info("Fehler in Datenbank gespeichert.");
-
 
     }
 
