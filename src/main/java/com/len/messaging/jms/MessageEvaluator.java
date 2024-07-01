@@ -42,16 +42,10 @@ public class MessageEvaluator {
             actions.add(Action.NO_DATA);
         } else if (!requestIsXml(message)) {
             actions.add(Action.KEIN_XML);
-        } else if (!requestIsXml(message)) { // Duplikat?
+        } else if (!requestIsXml(message)) { // Duplikat aus dem Original uebernommen
             actions.add(Action.AUSSTEUERN);
-            /*nur für die alte Verzögerungslogik
-        } else if (canProcessByTStamp(message)) {
-            actions.add(Action.DIREKT_VERARBEITEN);*/
         } else if (StringUtil.parseElsterInfo(message).isElo()) {
             actions.add(actionByWorkflowStep(message));
-            //Für Testzwecke
-/*        } else if (requestIsXml(message)){
-            actions.add(Action.DIREKT_VERARBEITEN);*/
         } else {
             System.out.println("Default Evaluator: " + message);
             actions.add(Action.AUSSTEUERN);
@@ -68,18 +62,6 @@ public class MessageEvaluator {
         return message.contains(XML_HEADER_START); // Vereinfachte Überprüfung, ob es sich um XML handelt
     }
 
-/*    *//**
-     * Die Methode wird im Original dazu verwendet, um eine Header-Eigenschaft aus der Message zu lesen, welche
-     * den frühesten Verarbeitungszeitpunkt enthält.
-     * Für die alte Verarbeitungslogik wichtig.
-     * *//*
-    private boolean canProcessByTStamp(String message) {
-        // Inhalt gelöscht.
-        // Wenn ein Zeitstempel im Header der Nachricht existiert, dann wurde er hier ausgewertet.
-        return false;
-    }*/
-
-
     private Action actionByWorkflowStep(String message) {
         return actionFor.get(StringUtil.parseElsterInfo(message).getStep());
     }
@@ -90,7 +72,4 @@ public class MessageEvaluator {
             .put(ElsterInfo.Step.ELSTAM_RESPONSE, Action.MITTEL_VERZOEGERN)
             .put(ElsterInfo.Step.DUE_RESPONSE, Action.LANG_VERZOEGERN)
             .toMap();
-
-
-
 }

@@ -4,16 +4,17 @@ package com.len.messaging.service;
 import com.len.messaging.domain.Fehler;
 import com.len.messaging.exception.AussteuernException;
 import com.len.messaging.repository.FehlerRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.retry.RetryException;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
-
-
 import static com.len.messaging.util.ExceptionUtil.contains;
 
 @Service
 public class IndexerService {
+
+    Logger logger = LoggerFactory.getLogger(this.getClass());
+
 
     private final ElsterIndexerService elsterIndexerService;
 
@@ -40,8 +41,8 @@ public class IndexerService {
         } catch (AussteuernException e) {
             fehlerAussteuern(xml, e);
         } catch (Exception e) {
-             if(true){
-            //if (retrySinnvoll(e)) {
+             //if(true){
+            if (retrySinnvoll(e)) {
                 /* führt automatisch zu einem Redelivery
                 * das Rollback muss nicht manuell angestoßen werden
                 * (im Gegenteil zum Original, da wird in der übergeordneten onMessage Fn diese gefangen
@@ -58,26 +59,26 @@ public class IndexerService {
     }
 
     private void fehlerAussteuern(String xml, Exception e) {
-        System.out.println("aussteuern");
-        String errorMessage = "Nicht parsbare Daten";
+        String errorMessage = "Aussteuern der Nachricht: ";
+        logger.error(errorMessage, e);
 
-        // Sehr gekürzte Protokollierung der Fehler - nur zu Demonstrationszwecken
+        // Fehler in Datenbank speichern
+        // Gekürzte Protokollierung der Fehler - nur zu Demonstrationszwecken
         Fehler fehler = new Fehler()
-                .message(errorMessage);
-          //      .stacktrace(e)
-           //     .rohdaten(xml);
+                .message(errorMessage)
+                .stacktrace(e)
+                .rohdaten(xml);
 
         fehlerRepository.save(fehler);
+
+        logger.info("Fehler in Datenbank gespeichert.");
+
+
     }
-
-
-
 
     private static boolean retrySinnvoll(Exception exception) {
         return istUniqueKeyViolationException(exception);
     }
-
-
 
     private static boolean istUniqueKeyViolationException(Exception exception) {
         return contains(exception, "TRANSFER_TT_NDT_IDX");

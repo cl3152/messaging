@@ -40,7 +40,13 @@ public class ElsterIndexerService {
                 logger.info("Konvertiertes Elsterdata: " + elsterData);
                 /* Beispielhaftes Speichern von Daten (Vereinfachung).
                  * Im Original werden hier mehr Daten gespeichert.
-                 */
+                 *
+                 * Im Original werden in der Methode folgende Exceptions geprüft, die zu einem Aussteuern führen:
+                 * IllegalStateException | RollbackException | SecurityException | HeuristicMixedException | HeuristicRollbackException |
+                 * javax.transaction.RollbackException | SystemException | NotSupportedException e
+                 * Was hier sinnvoll ist, muss überprüft werden.
+                 * Evtl. PersistenceExceptionTranslator einsetzen
+                 * */
                 arbeitnehmerService.processElsterDataForArbeitnehmer(elsterData);
             } else {
                 // Wenn Mapping nicht gelingt

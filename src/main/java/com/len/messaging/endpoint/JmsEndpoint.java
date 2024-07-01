@@ -1,7 +1,5 @@
-package com.len.messaging;
+package com.len.messaging.endpoint;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.len.messaging.jms.JmsMetrics;
 import com.len.messaging.service.MetricsService;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
@@ -10,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
-
+// mit eingebetteten JMS-Broker schlaegt die test-queue-size fehl
 @Component
 @Endpoint(id = "jms")
 public class JmsEndpoint {

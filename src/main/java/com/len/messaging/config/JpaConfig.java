@@ -1,7 +1,7 @@
 
 
 
-//Es werden keine JMS-Transaktionen verwendet, deswegen muss kein JPA-Manager explizit definiert werden.
+// Im Prototypen muss kein JPA-Manager explizit definiert werden.
 
 package com.len.messaging.config;
 
@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import jakarta.persistence.EntityManagerFactory;
 
-@Configuration
+//@Configuration
 @EnableTransactionManagement
 public class JpaConfig {
 

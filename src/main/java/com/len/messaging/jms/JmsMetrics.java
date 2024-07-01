@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Base64;
 import java.util.Map;
 
+// mit dem eingebetteten JMS-Broker nicht möglich
 @Component
 public class JmsMetrics {
 

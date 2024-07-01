@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration scan="true">
+
+    <!--
+    muss in Spring Boot unter src/main/resources abgelegt werden
+    Zudem muessen die externen Bibliotheken ergaenzt werden
+
+    Der SrtLogger stellt folgende ETEM-Felder zur Verfügung:
+    - Nutzdatenticket
+    - meldung
+    Vom ETEM-Logger werden noch folgende Felder ererbt:
+    - server
+    - containername
+    - benutzer
+    - loglevel
+    - anwendung
+    - ticketnr
+    -->
+
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="de.elster.etem.sapi.EtemPatternEncoder">
+            <pattern>%d{HH:mm:ss.SSS} %5p %.35class.%method %etem{meldung} %ex{full} %n</pattern>
+            <!--pattern>%d{HH:mm:ss.SSS} %5p %.35class.%method TT=%etem{ticketnr} NDT='%etem{Nutzdatenticket}' %etem{meldung} %ex{full} %n</pattern-->
+            <!--
+            <pattern>%d{HH:mm:ss.SSS} %5p %.35class.%method [%etem{Eventzeit} %2etem{loglevel} %etem{ticketnr} %etem{meldung} %etem{Datenart} %etem{Aktion} %etem{Nutzdatenticket}] - %m %ex{full} %n</pattern>
+            -->
+        </encoder>
+    </appender>
+    <appender name="srt-file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>./logs/srt.log</file>
+        <!--
+        <file>/rzf/protokolle/srt.log</file>
+        -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- daily rollover -->
+            <fileNamePattern>srt.%d{yyyy-MM-dd}.log</fileNamePattern>
+
+            <!-- keep 30 days' worth of history -->
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder class="de.elster.etem.sapi.EtemPatternEncoder">
+            <pattern>%d{HH:mm:ss.SSS} %5p %.35class.%method [TT='%etem{ticketnr}' NDT='%etem{Nutzdatenticket}'] [%etem{meldung}] %ex{full} %n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="IGEL" class="de.elster.etem.sapi.EtemFileAppender">
+        <!-- das verzeichnis -->
+        <dir>./etem</dir>
+        <prefix>srt</prefix>
+    </appender>
+
+    <logger name="de.konsens.lavendel.srt" level="INFO">
+        <!--appender-ref ref="srt-file"/-->
+        <appender-ref ref="IGEL"/>
+    </logger>
+
+
+    <!-- Nur Consolen-Ausgaben / Keine IGEL-Ausgaben während dev/tests -->
+    <root level="info">
+        <appender-ref ref="STDOUT" />
+    </root>
+
+</configuration>

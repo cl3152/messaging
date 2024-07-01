@@ -46,6 +46,7 @@ public class MessagingConfig {
 
     private final IndexerService indexerService;
 
+    private static final Logger logger = LoggerFactory.getLogger(MessagingConfig.class);
 
     public MessagingConfig(MessageEvaluator messageEvaluator, ProcessingGateway processingGateway, IndexerService indexerService) {
         this.messageEvaluator = messageEvaluator;
@@ -53,50 +54,22 @@ public class MessagingConfig {
         this.indexerService = indexerService;
     }
 
-    private static final Logger logger = LoggerFactory.getLogger(MessagingConfig.class);
-
-
     @MessagingGateway
     public interface ProcessingGateway {
 
         @Gateway(requestChannel = "errorChannel")
         void sendToErrorChannel(Message<String> message);
 
-        @Gateway(requestChannel = "inputChannel")
-        void sendToRouter(Message<String> message);
+        @Gateway(requestChannel = "inputIntegration")
+        void sendToInputIntegration(Message<String> message);
 
         @Gateway(requestChannel = "processingChannel")
         void sendToProcessingChannel(Message<String> message);
-
-        @Gateway(requestChannel = "delayingChannel")
-        void sendToDelayingChannel(Message<String> message);
 
         @Gateway(requestChannel = "transformingChannel")
         void sendToTransformingChannel(Message<String> message);
 
     }
-
-    @Bean
-    @ServiceActivator(inputChannel = "delayingChannel")
-    public DelayHandler delayer() {
-        DelayHandler handler = new DelayHandler("delayer.messageGroupId");
-        handler.setDelayExpressionString("headers['delay']");
-        handler.setDefaultDelay(0L);
-        handler.setOutputChannelName("processingChannel");
-        return handler;
-    }
-
-@Transformer(inputChannel = "transformingChannel", outputChannel = "delayingChannel")
-public Message<String> transformingInput(Message<String> message) {
-    logger.info("Transforming messaging - adding Delay in header");
-        MessageEvaluator.Action action = messageEvaluator.evaluate(message.getPayload());
-        long delay = action.getDelayFactor() * 2000;
-
-    return MessageBuilder.fromMessage(message)
-                .setHeader("delay", delay)
-                .build();
-    };
-
 
     @ServiceActivator(inputChannel = "inputIntegration")
     public void receivingInput(Message<String> message) {
@@ -111,40 +84,53 @@ public Message<String> transformingInput(Message<String> message) {
                 processingGateway.sendToErrorChannel(message);
                 break;
             case KURZ_VERZOEGERN:
-                System.out.println("kurz verzögern: ");
+                logger.info("Case: kurz verzögern");
             case LANG_VERZOEGERN:
-                System.out.println("lang verzögern: ");
+                logger.info("Case: lang verzögern");
             case MITTEL_VERZOEGERN:
-                System.out.println("mittel verzögern: ");
+                logger.info("Case: mittel verzögern");
                 processingGateway.sendToTransformingChannel(message);
                 break;
             default:
-                System.out.println("Default: " + message);
+                logger.info("Case: default");
                 break;
         }
     }
 
+    @Transformer(inputChannel = "transformingChannel", outputChannel = "delayingChannel")
+    public Message<String> transformingInput(Message<String> message) {
+        logger.info("Eine Verzögerung wird im Headerfeld delay hinzugefuegt.");
+        MessageEvaluator.Action action = messageEvaluator.evaluate(message.getPayload());
+        long delay = action.getDelayFactor() * 2000;
+
+        return MessageBuilder.fromMessage(message)
+                .setHeader("delay", delay)
+                .build();
+    };
+    @Bean
+    @ServiceActivator(inputChannel = "delayingChannel")
+    public DelayHandler delayer() {
+        DelayHandler handler = new DelayHandler("delayer.messageGroupId");
+        handler.setDelayExpressionString("headers['delay']");
+        handler.setDefaultDelay(0L);
+        handler.setOutputChannelName("processingChannel");
+        return handler;
+    }
 
     @ServiceActivator(inputChannel = "processingChannel")
     public void processingInput(Message<String> message) {
-        logger.info("Processing message has this header: {}", message.getHeaders());
-        System.out.println("Input Processing. ");
-        /* try catch nicht notwendig, da das Werfen einer RetryException sowieso zum Rollback führt
-        * kein manuelles Anstoßen des Rollbacks notwendig
-        *
+        logger.info("Input wird verarbeitet.");
+        /*
         * Im Original wird hier noch eine Methode process ausgeführt, die die Multithreading-Verarbeitung
         * kontrolliert.
          */
         indexerService.mapAndStore(message.getPayload());
     }
 
-
     @ServiceActivator(inputChannel = "errorChannel")
     public void handleError(Message<String> message) {
         String error = message.getPayload();
-        logger.error("Error processing message: {}", error);
-        // Senden ans Monitoring?! TODO: ??
+        logger.error("Error bei der Nachrichtenverarbeitung: {}", error);
     }
-
 
 }

@@ -4,10 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
+
+// Wird in der Main-Methode zum Senden der XML in die Queue verwendet.
 @Component
 public class SimpleSender {
 
-    private JmsTemplate jmsTemplate;
+    private final JmsTemplate jmsTemplate;
 
     @Autowired
     public SimpleSender(JmsTemplate jmsTemplate){

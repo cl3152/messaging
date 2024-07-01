@@ -1,0 +1,15 @@
+version: '3'
+services:
+  activemq:
+    image: rmohr/activemq
+    ports:
+      - "8161:8161"   # Web-Konsole
+      - "61616:61616" # JMS
+      - "1099:1099"   # JMX
+    environment:
+      ACTIVEMQ_ADMIN_LOGIN: admin
+      ACTIVEMQ_ADMIN_PASSWORD: admin
+      ACTIVEMQ_CONFIG_MINMEMORY: 512
+      ACTIVEMQ_CONFIG_MAXMEMORY: 2048
+      ACTIVEMQ_OPTS_MEMORY: "-Xms512M -Xmx2048M"
+

@@ -1,143 +1,90 @@
 package com.len.messaging.config;
 
-import com.len.messaging.jms.QueueListener;
 import jakarta.jms.ConnectionFactory;
-import jakarta.jms.MessageListener;
-import jakarta.jms.Session;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.RedeliveryPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFactoryConfigurer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.channel.DirectChannel;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
-import org.springframework.jms.config.JmsListenerContainerFactory;
 import org.springframework.jms.connection.CachingConnectionFactory;
 import org.springframework.jms.connection.JmsTransactionManager;
-import org.springframework.jms.listener.DefaultMessageListenerContainer;
-import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
-import org.springframework.jms.support.converter.MessageConverter;
-import org.springframework.jms.support.converter.MessageType;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.jms.core.JmsTemplate;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.ErrorHandler;
 
-//@Configuration
+@Configuration
 @EnableConfigurationProperties(JMSProperties.class)
 @EnableJms
 public class JMSConfig {
+     @Bean
+     public ConnectionFactory connectionFactory() {
+          ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory();
+          RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
+          redeliveryPolicy.setMaximumRedeliveries(4);
+          redeliveryPolicy.setInitialRedeliveryDelay(1000);
+          redeliveryPolicy.setRedeliveryDelay(1000);
+          redeliveryPolicy.setUseExponentialBackOff(false);
+          activeMQConnectionFactory.setRedeliveryPolicy(redeliveryPolicy);
 
-     private static final Logger logger = LoggerFactory.getLogger(JMSConfig.class);
+          return new CachingConnectionFactory(activeMQConnectionFactory);
+     }
 
      @Bean
-     public JmsListenerContainerFactory<?> jmsListenerContainerFactory(ConnectionFactory connectionFactory, @Qualifier("jmsErrorHandler") ErrorHandler errorHandler) {
+     public DefaultJmsListenerContainerFactory jmsListenerContainerFactory(ConnectionFactory connectionFactory){
           DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
           factory.setConnectionFactory(connectionFactory);
-          factory.setConcurrency("1");
-          factory.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
+          factory.setConcurrency("1-20");
+          factory.setSessionTransacted(true);
+          return factory;
+     }
 
-          if (connectionFactory instanceof CachingConnectionFactory) {
-               CachingConnectionFactory cachingConnectionFactory = (CachingConnectionFactory) connectionFactory;
-               if (cachingConnectionFactory.getTargetConnectionFactory() instanceof org.apache.activemq.ActiveMQConnectionFactory) {
-                    org.apache.activemq.ActiveMQConnectionFactory activeMQConnectionFactory =
-                            (org.apache.activemq.ActiveMQConnectionFactory) cachingConnectionFactory.getTargetConnectionFactory();
-                    RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
-                    redeliveryPolicy.setMaximumRedeliveries(3);
-                    redeliveryPolicy.setInitialRedeliveryDelay(1000);
-                    redeliveryPolicy.setRedeliveryDelay(1000);
-                    redeliveryPolicy.setUseExponentialBackOff(false);
-                    activeMQConnectionFactory.setRedeliveryPolicy(redeliveryPolicy);
-               }
-          }
-
+/*   Zeigt, wie die Konfiguration aussieht, wenn ein PlatformTransactionManager, ein ErrorHandler und das TransactionTemplate verwendet werden soll
+     @Bean
+     public DefaultJmsListenerContainerFactory jmsListenerContainerFactory(
+             ConnectionFactory connectionFactory,
+             @Qualifier("jmsErrorHandler") ErrorHandler errorHandler,
+             @Qualifier("jmsTransactionManager") PlatformTransactionManager jmsTransactionManager) {
+          DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
+          factory.setConnectionFactory(connectionFactory);
+          factory.setConcurrency("1-20");
+          factory.setSessionTransacted(true); // Aktiviert lokale Transaktionen
+         // factory.setTransactionManager(jmsTransactionManager);
           factory.setErrorHandler(errorHandler);
-
           return factory;
      }
 
      @Bean
-     public MessageChannel errorChannel() {
-          return new DirectChannel();
+     public JmsTemplate jmsTemplate(ConnectionFactory connectionFactory) {
+          JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory);
+          jmsTemplate.setSessionTransacted(true);
+          return jmsTemplate;
      }
 
-     // https://www.baeldung.com/spring-jms
+     @Bean(name = "jmsTransactionManager")
+     public PlatformTransactionManager jmsTransactionManager(ConnectionFactory connectionFactory) {
+          return new JmsTransactionManager(connectionFactory);
+     }
+
+     @Bean(name = "jmsTransactionTemplate")
+     public TransactionTemplate transactionTemplate(@Qualifier("jmsTransactionManager") PlatformTransactionManager transactionManager) {
+          return new TransactionTemplate(transactionManager);
+     }
+
+     private static final Logger logger = LoggerFactory.getLogger(JMSConfig.class);
+
      @Bean
-     public ErrorHandler jmsErrorHandler(MessageChannel errorChannel) {
+     public ErrorHandler jmsErrorHandler() {
           return t -> {
                logger.error("Fehler im JMS Listener aufgetreten: ", t);
-
-               // Nachricht an den errorChannel senden
-               Message<String> errorMessage = MessageBuilder.withPayload(t.getMessage())
-                       .setHeader("error", t.getMessage())
-                       .build();
-               errorChannel.send(errorMessage);
+               // Optional: Weitere Fehlerbehandlungslogik
           };
      }
 
-
-    /** This is for the QueueListener
      */
-/*
-	@Bean
-	public DefaultMessageListenerContainer customMessageListenerContainer(
-            ConnectionFactory connectionFactory, MessageListener queueListener, @Value("${apress.jms.queue}") final String destinationName){
-		DefaultMessageListenerContainer listener = new DefaultMessageListenerContainer();
-		listener.setConnectionFactory(connectionFactory);
-		listener.setDestinationName(destinationName);
-		listener.setMessageListener(queueListener);
-		return listener;
-	}
-*/
-
-
-    /* This is necessary when you want to send and Object without using Serializable.*/
-/*    @Bean
-    public MessageConverter jacksonJmsMessageConverter() {
-        MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
-        converter.setTargetType(MessageType.TEXT);
-        converter.setTypeIdPropertyName("_class_"); // This value can be anything, it will save the JSON class name and it must be the same for sender/receiver
-        return converter;
-    }*/
-
-
-
-
-
-    /*** This section is another way to customize a Connection Factory and the Message Listener by implementing the JmsListenerConfigurer
-     @Bean
-     public DefaultJmsListenerContainerFactory customFactory(ConnectionFactory connectionFactory, DefaultJmsListenerContainerFactoryConfigurer configurer) {
-     DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
-     configurer.configure(factory, connectionFactory);
-     return factory;
-     }
-
-     @Configuration
-     public static class ListenerConfig implements JmsListenerConfigurer{
-
-     private MessageListener queueListener;
-     private String destinationName;
-
-     public ListenerConfig(MessageListener queueListener, @Value("${apress.jms.queue}") final String destinationName){
-     this.queueListener = queueListener;
-     this.destinationName = destinationName;
-     }
-
-     @Override
-     public void configureJmsListeners(JmsListenerEndpointRegistrar registrar) {
-     SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
-     endpoint.setId(UUID.randomUUID().toString());
-     endpoint.setDestination(this.destinationName);
-     endpoint.setMessageListener(this.queueListener);
-     registrar.registerEndpoint(endpoint);
-     }
-     }
-     ***/
-
 }
